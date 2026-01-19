@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="description" content="RED - The Ultimate NFC Business Card. Connect instantly with a tap. NTAG 424 DNA technology for maximum data storage.">
+    <title>RED | NFC Business Card - Connect With a Tap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --black: #000; --pitch-black: #030303; --dark: #0a0a0a; --darker: #050505;
+            --white: #fff; --gray: #888; --light-gray: #ccc;
+            --red: #ff0033; --red-bright: #ff1a4a; --red-glow: #ff3366; --red-dark: #cc0029;
+            --red-neon: #ff0040; --red-electric: #ff1744; --red-plasma: #ff2d5a;
+            --glow-red: 0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 40px #ff0033, 0 0 80px #ff003388;
+            --glow-red-intense: 0 0 5px #ff0033, 0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 40px #ff0033, 0 0 80px #ff0033, 0 0 120px #ff003366;
+            --glow-red-soft: 0 0 5px rgba(255,0,51,0.5), 0 0 15px rgba(255,0,51,0.3);
+            --glow-red-text: 0 0 10px #ff0033, 0 0 20px #ff003388, 0 0 40px #ff003344;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: var(--font-body); 
+            color: var(--white); 
+            background: var(--pitch-black); 
+            line-height: 1.6; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+            cursor: none;
+        }
+        
+        /* Custom Cursor */
+        .cursor { position: fixed; pointer-events: none; z-index: 9999; }
+        .cursor-dot { 
+            width: 8px; height: 8px; 
+            background: var(--red); 
+            border-radius: 50%; 
+            box-shadow: var(--glow-red);
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s, width 0.2s, height 0.2s;
+        }
+        .cursor-trail { 
+            position: fixed; 
+            width: 4px; height: 4px; 
+            background: var(--red); 
+            border-radius: 50%; 
+            pointer-events: none; 
+            z-index: 9998;
+            opacity: 0.8;
+            box-shadow: 0 0 6px var(--red);
+        }
+        body:hover .cursor-dot { transform: translate(-50%, -50%) scale(1.2); }
+        a:hover ~ .cursor .cursor-dot,
+        button:hover ~ .cursor .cursor-dot { transform: translate(-50%, -50%) scale(2); background: transparent; border: 2px solid var(--red); }
+        
+        /* Canvas Background */
+        #global-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        
+        /* Grid Overlay */
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                linear-gradient(90deg, rgba(255,0,51,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(255,0,51,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 1; pointer-events: none;
+        }
+        
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.1) 2px,
+                rgba(0,0,0,0.1) 4px
+            );
+            z-index: 2; pointer-events: none; opacity: 0.3;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5 { font-family: var(--font-display); font-weight: 700; line-height: 1.1; letter-spacing: 0.05em; text-transform: uppercase; }
+        h1 { font-size: clamp(3rem, 12vw, 8rem); }
+        h2 { font-size: clamp(2rem, 6vw, 4rem); }
+        h3 { font-size: clamp(1.2rem, 3vw, 1.8rem); }
+        p { font-size: clamp(1rem, 2.5vw, 1.15rem); color: rgba(255,255,255,0.7); line-height: 1.8; font-weight: 400; }
+        
+        /* Glitch Text Effect */
+        .glitch {
+            position: relative;
+            animation: glitch-skew 4s infinite linear alternate-reverse;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .glitch::before {
+            color: var(--red-bright);
+            animation: glitch-effect 3s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            transform: translate(-3px, 0);
+            opacity: 0.8;
+        }
+        .glitch::after {
+            color: #00ffff;
+            animation: glitch-effect 2s infinite linear alternate-reverse;
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+            transform: translate(3px, 0);
+            opacity: 0.8;
+        }
+        @keyframes glitch-effect {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            10% { transform: skew(-0.5deg); }
+            20% { transform: skew(0.5deg); }
+            30% { transform: skew(0deg); }
+            100% { transform: skew(0deg); }
+        }
+        
+        /* Neon Glow Pulse */
+        .neon-pulse { animation: neonPulse 2s ease-in-out infinite; }
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: var(--glow-red-soft); }
+            50% { text-shadow: var(--glow-red-intense); }
+        }
+        
+        /* Navigation */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(3,3,3,0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,0,51,0.2);
+            transition: all 0.3s;
+        }
+        .nav.scrolled {
+            background: rgba(3,3,3,0.95);
+            border-bottom-color: rgba(255,0,51,0.5);
+            box-shadow: 0 0 40px rgba(255,0,51,0.2);
+        }
+        .nav-container {
+            max-width: 1400px; margin: 0 auto;
+            padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 70px;
+        }
+        .nav-logo {
+            font-family: var(--font-display); font-size: 1.8rem; font-weight: 900;
+            color: var(--red); text-decoration: none;
+            letter-spacing: 0.15em;
+            text-shadow: var(--glow-red);
+            transition: all 0.3s;
+        }
+        .nav-logo:hover { text-shadow: var(--glow-red-intense); }
+        .nav-logo span { color: var(--white); text-shadow: none; }
+        .nav-links { display: none; list-style: none; gap: 40px; }
+        @media (min-width: 900px) { .nav-links { display: flex; } }
+        .nav-links a {
+            font-family: var(--font-mono); font-size: 0.75rem; font-weight: 400;
+            color: rgba(255,255,255,0.6); text-decoration: none;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            transition: all 0.3s; position: relative; padding: 8px 0;
+        }
+        .nav-links a::before {
+            content: '//'; color: var(--red); margin-right: 6px;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .nav-links a:hover { color: var(--red); text-shadow: var(--glow-red-soft); }
+        .nav-links a:hover::before { opacity: 1; }
+        .nav-cta {
+            font-family: var(--font-display); font-size: 0.8rem; font-weight: 600;
+            color: var(--white); background: var(--red);
+            border: none; border-radius: 0; padding: 12px 28px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em;
+            box-shadow: var(--glow-red-soft);
+            transition: all 0.3s;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+        }
+        .nav-cta:hover {
+            background: var(--red-bright);
+            box-shadow: var(--glow-red);
+            transform: translateY(-2px);
+        }
+        .menu-toggle {
+            display: flex; flex-direction: column; gap: 6px;
+            background: none; border: none; cursor: pointer; padding: 8px;
+        }
+        @media (min-width: 900px) { .menu-toggle { display: none; } }
+        .menu-toggle span {
+            width: 28px; height: 2px; background: var(--red);
+            box-shadow: var(--glow-red-soft); transition: all 0.3s;
+        }
+        .menu-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+        .menu-toggle.active span:nth-child(2) { opacity: 0; }
+        .menu-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+        
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(3,3,3,0.98); z-index: 999;
+            padding: 100px 32px 32px;
+            transform: translateX(100%); transition: transform 0.4s;
+            overflow-y: auto;
+        }
+        .mobile-menu.active { transform: translateX(0); }
+        .mobile-menu-links { list-style: none; }
+        .mobile-menu-links li { border-bottom: 1px solid rgba(255,0,51,0.15); }
+        .mobile-menu-links a {
+            display: block; padding: 24px 0;
+            font-family: var(--font-display); font-size: 2rem;
+            color: var(--white); text-decoration: none;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+        .mobile-menu-links a:hover { color: var(--red); padding-left: 20px; }
+        .mobile-menu-cta {
+            width: 100%; margin-top: 32px;
+            font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+            color: var(--white); background: var(--red);
+            border: none; padding: 20px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            box-shadow: var(--glow-red);
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; padding: 100px 24px 80px;
+            position: relative; z-index: 10; overflow: hidden;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-family: var(--font-mono); font-size: 0.7rem;
+            color: var(--red); background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.3);
+            padding: 10px 20px; margin-bottom: 32px;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            animation: fadeInDown 0.8s ease forwards;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .hero-badge::before {
+            content: ''; width: 8px; height: 8px;
+            background: var(--red); border-radius: 50%;
+            box-shadow: var(--glow-red);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .hero-title {
+            margin-bottom: 24px;
+            opacity: 0; animation: heroReveal 1s ease 0.3s forwards;
+        }
+        .hero-title .red { 
+            color: var(--red); 
+            text-shadow: var(--glow-red-intense);
+            display: block;
+        }
+        .hero-title .sub {
+            font-size: 0.35em; color: rgba(255,255,255,0.6);
+            letter-spacing: 0.3em; display: block;
+            margin-top: 16px; text-shadow: none;
+        }
+        @keyframes heroReveal { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .hero-tagline {
+            font-family: var(--font-mono); font-size: clamp(1rem, 3vw, 1.3rem);
+            color: var(--red); margin-bottom: 24px;
+            opacity: 0; animation: fadeInUp 0.8s ease 0.6s forwards;
+            text-shadow: var(--glow-red-soft);
+        }
+        .hero-desc {
+            max-width: 600px; margin-bottom: 40px;
+            opacity: 0; animation: fadeInUp 0.8s ease 0.8s forwards;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .hero-cta {
+            display: flex; flex-direction: column; gap: 16px;
+            opacity: 0; animation: fadeInUp 0.8s ease 1s forwards;
+        }
+        @media (min-width: 500px) { .hero-cta { flex-direction: row; } }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            font-family: var(--font-display); font-size: 0.85rem; font-weight: 600;
+            text-decoration: none; padding: 18px 36px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em;
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .btn-primary {
+            color: var(--white); background: var(--red);
+            border: none; box-shadow: var(--glow-red-soft);
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+        .btn-primary::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover { box-shadow: var(--glow-red); transform: translateY(-3px); }
+        .btn-primary:hover::before { left: 100%; }
+        .btn-secondary {
+            color: var(--red); background: transparent;
+            border: 2px solid var(--red);
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+        .btn-secondary:hover {
+            background: rgba(255,0,51,0.15);
+            box-shadow: var(--glow-red-soft);
+            transform: translateY(-3px);
+        }
+        .btn svg { width: 20px; height: 20px; }
+        
+        /* Card Preview */
+        .hero-card {
+            margin-top: 60px;
+            opacity: 0; animation: cardReveal 1.2s ease 1.2s forwards;
+        }
+        @keyframes cardReveal { from { opacity: 0; transform: translateY(60px) rotateX(20deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
+        
+        .card-3d {
+            width: clamp(280px, 80vw, 400px);
+            aspect-ratio: 1.6/1;
+            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+            border: 1px solid rgba(255,0,51,0.4);
+            border-radius: 16px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
+            transition: transform 0.5s;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), var(--glow-red-soft);
+        }
+        .card-3d:hover { transform: perspective(1000px) rotateY(5deg) rotateX(-5deg); }
+        .card-inner {
+            position: absolute; inset: 0; padding: 32px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card-logo {
+            font-family: var(--font-display); font-size: 1.4rem; font-weight: 900;
+            color: var(--red); letter-spacing: 0.2em;
+            text-shadow: var(--glow-red);
+        }
+        .card-nfc {
+            position: absolute; top: 24px; right: 24px;
+            width: 40px; height: 40px;
+            border: 2px solid var(--red);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--glow-red-soft);
+            animation: nfcPulse 2s infinite;
+        }
+        @keyframes nfcPulse {
+            0%, 100% { box-shadow: var(--glow-red-soft); }
+            50% { box-shadow: var(--glow-red); transform: scale(1.05); }
+        }
+        .card-nfc svg { width: 20px; height: 20px; color: var(--red); }
+        .card-name {
+            font-family: var(--font-display); font-size: 1.1rem;
+            color: var(--white); letter-spacing: 0.1em;
+        }
+        .card-title {
+            font-family: var(--font-mono); font-size: 0.7rem;
+            color: rgba(255,255,255,0.5); letter-spacing: 0.15em;
+            text-transform: uppercase; margin-top: 4px;
+        }
+        .card-chip {
+            width: 45px; height: 35px;
+            background: linear-gradient(135deg, #c9a227, #f4d03f, #c9a227);
+            border-radius: 6px;
+            position: absolute; bottom: 32px; right: 32px;
+        }
+        .card-chip::before {
+            content: '';
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px; height: 20px;
+            background: repeating-linear-gradient(
+                90deg,
+                #a08620 0px, #a08620 2px,
+                transparent 2px, transparent 5px
+            );
+        }
+        
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute; bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            opacity: 0; animation: fadeInUp 0.8s ease 1.5s forwards;
+            cursor: pointer;
+        }
+        .scroll-indicator span {
+            font-family: var(--font-mono); font-size: 0.65rem;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+        }
+        .scroll-line {
+            width: 1px; height: 60px;
+            background: linear-gradient(180deg, var(--red), transparent);
+            position: relative;
+        }
+        .scroll-line::after {
+            content: '';
+            position: absolute; top: 0; left: -2px;
+            width: 5px; height: 10px;
+            background: var(--red);
+            box-shadow: var(--glow-red);
+            animation: scrollDown 2s infinite;
+        }
+        @keyframes scrollDown {
+            0% { top: 0; opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        /* Section Styles */
+        .section { padding: 100px 24px; position: relative; z-index: 10; }
+        @media (min-width: 768px) { .section { padding: 140px 32px; } }
+        .section-container { max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; max-width: 800px; margin: 0 auto 72px; }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 12px;
+            font-family: var(--font-mono); font-size: 0.7rem;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--red); margin-bottom: 20px;
+            text-shadow: var(--glow-red-soft);
+        }
+        .section-label::before, .section-label::after {
+            content: ''; width: 30px; height: 1px;
+            background: var(--red); box-shadow: var(--glow-red-soft);
+        }
+        .section-title { margin-bottom: 24px; }
+        .section-title .highlight {
+            color: var(--red);
+            text-shadow: var(--glow-red-text);
+        }
+        
+        /* Features Section */
+        .features { background: linear-gradient(180deg, transparent, rgba(255,0,51,0.02), transparent); }
+        .features-grid {
+            display: grid; grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        @media (min-width: 640px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1000px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+        
+        .feature-card {
+            background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95));
+            border: 1px solid rgba(255,0,51,0.15);
+            padding: 40px 32px;
+            position: relative; overflow: hidden;
+            transition: all 0.4s;
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255,0,51,0.4);
+            box-shadow: 0 20px 60px rgba(255,0,51,0.15);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-icon {
+            width: 56px; height: 56px;
+            background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        .feature-icon svg {
+            width: 28px; height: 28px; color: var(--red);
+            filter: drop-shadow(0 0 10px rgba(255,0,51,0.5));
+        }
+        .feature-card h3 { margin-bottom: 12px; font-size: 1.2rem; }
+        .feature-card p { font-size: 0.95rem; line-height: 1.7; }
+        .feature-number {
+            position: absolute; top: 16px; right: 20px;
+            font-family: var(--font-display); font-size: 3rem;
+            color: rgba(255,0,51,0.08); font-weight: 900;
+        }
+        
+        /* Tech Specs Section */
+        .tech-specs { background: rgba(255,0,51,0.02); }
+        .tech-grid {
+            display: grid; grid-template-columns: 1fr;
+            gap: 60px; align-items: center;
+        }
+        @media (min-width: 900px) { .tech-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .tech-visual {
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+        }
+        .chip-diagram {
+            width: clamp(250px, 60vw, 350px);
+            aspect-ratio: 1;
+            position: relative;
+        }
+        .chip-core {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+            border: 2px solid var(--red);
+            box-shadow: var(--glow-red);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .chip-core span {
+            font-family: var(--font-mono); font-size: 0.6rem;
+            color: var(--red); letter-spacing: 0.1em;
+        }
+        .chip-ring {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(255,0,51,0.3);
+            border-radius: 50%;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+        .chip-ring:nth-child(1) { width: 150px; height: 150px; animation-delay: 0s; }
+        .chip-ring:nth-child(2) { width: 220px; height: 220px; animation-delay: 0.5s; }
+        .chip-ring:nth-child(3) { width: 290px; height: 290px; animation-delay: 1s; }
+        @keyframes ringPulse {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        .chip-data {
+            position: absolute;
+            font-family: var(--font-mono); font-size: 0.6rem;
+            color: var(--red); letter-spacing: 0.05em;
+            text-shadow: var(--glow-red-soft);
+            animation: dataFloat 4s ease-in-out infinite;
+        }
+        .chip-data:nth-child(5) { top: 10%; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+        .chip-data:nth-child(6) { top: 50%; right: 5%; transform: translateY(-50%); animation-delay: 1s; }
+        .chip-data:nth-child(7) { bottom: 10%; left: 50%; transform: translateX(-50%); animation-delay: 2s; }
+        .chip-data:nth-child(8) { top: 50%; left: 5%; transform: translateY(-50%); animation-delay: 3s; }
+        @keyframes dataFloat {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .tech-content { }
+        .tech-content h2 { text-align: left; margin-bottom: 24px; }
+        .tech-content > p { margin-bottom: 40px; }
+        
+        .spec-list { list-style: none; }
+        .spec-item {
+            display: flex; align-items: flex-start; gap: 20px;
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255,0,51,0.1);
+        }
+        .spec-item:last-child { border-bottom: none; }
+        .spec-icon {
+            width: 44px; height: 44px; flex-shrink: 0;
+            background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.2);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .spec-icon svg { width: 22px; height: 22px; color: var(--red); }
+        .spec-text h4 {
+            font-family: var(--font-body); font-size: 1rem;
+            font-weight: 600; margin-bottom: 4px;
+            text-transform: none; letter-spacing: normal;
+        }
+        .spec-text p { font-size: 0.9rem; line-height: 1.6; }
+        
+        /* How It Works Section */
+        .how-it-works { }
+        .steps-container { max-width: 900px; margin: 0 auto; }
+        .step {
+            display: grid; grid-template-columns: 1fr;
+            gap: 32px; align-items: center;
+            padding: 48px 0;
+            border-bottom: 1px solid rgba(255,0,51,0.1);
+        }
+        @media (min-width: 768px) { .step { grid-template-columns: 120px 1fr; } }
+        .step:last-child { border-bottom: none; }
+        
+        .step-number {
+            font-family: var(--font-display); font-size: 4rem;
+            font-weight: 900; color: var(--red);
+            text-shadow: var(--glow-red);
+            line-height: 1;
+        }
+        .step-content h3 { margin-bottom: 12px; }
+        .step-content p { }
+        
+        /* Pricing Section */
+        .pricing { background: linear-gradient(180deg, transparent, rgba(255,0,51,0.02), transparent); }
+        .pricing-grid {
+            display: grid; grid-template-columns: 1fr;
+            gap: 24px; max-width: 1000px; margin: 0 auto;
+        }
+        @media (min-width: 768px) { .pricing-grid { grid-template-columns: repeat(3, 1fr); } }
+        
+        .price-card {
+            background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95));
+            border: 1px solid rgba(255,0,51,0.2);
+            padding: 40px 32px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s;
+        }
+        .price-card.featured {
+            border-color: var(--red);
+            box-shadow: var(--glow-red-soft);
+            transform: scale(1.05);
+        }
+        .price-card:hover { transform: translateY(-8px); border-color: var(--red); }
+        .price-card.featured:hover { transform: scale(1.05) translateY(-8px); }
+        
+        .price-badge {
+            position: absolute; top: -12px; left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono); font-size: 0.65rem;
+            color: var(--white); background: var(--red);
+            padding: 6px 16px;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            box-shadow: var(--glow-red-soft);
+        }
+        .price-name {
+            font-family: var(--font-display); font-size: 1.2rem;
+            color: var(--red); margin-bottom: 8px;
+            letter-spacing: 0.1em;
+        }
+        .price-amount {
+            font-family: var(--font-display); font-size: 3.5rem;
+            font-weight: 900; color: var(--white);
+            line-height: 1; margin-bottom: 8px;
+        }
+        .price-amount span { font-size: 1rem; color: rgba(255,255,255,0.5); }
+        .price-desc {
+            font-size: 0.85rem; color: rgba(255,255,255,0.5);
+            margin-bottom: 32px;
+        }
+        .price-features {
+            list-style: none; text-align: left;
+            margin-bottom: 32px;
+        }
+        .price-features li {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem; color: rgba(255,255,255,0.7);
+        }
+        .price-features li:last-child { border-bottom: none; }
+        .price-features li svg {
+            width: 18px; height: 18px; color: var(--red); flex-shrink: 0;
+        }
+        .price-btn { width: 100%; }
+        
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            background: radial-gradient(ellipse at center, rgba(255,0,51,0.1) 0%, transparent 70%);
+            padding: 120px 24px;
+        }
+        .cta-section h2 { margin-bottom: 24px; }
+        .cta-section p { max-width: 600px; margin: 0 auto 40px; }
+        .cta-buttons { display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+        @media (min-width: 500px) { .cta-buttons { flex-direction: row; } }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(180deg, transparent, rgba(10,10,10,0.95));
+            padding: 80px 24px 32px;
+            position: relative; z-index: 10;
+        }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-top {
+            display: grid; grid-template-columns: 1fr;
+            gap: 48px; margin-bottom: 48px;
+        }
+        @media (min-width: 640px) { .footer-top { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .footer-top { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+        
+        .footer-brand { }
+        .footer-logo {
+            font-family: var(--font-display); font-size: 2rem; font-weight: 900;
+            color: var(--red); letter-spacing: 0.15em;
+            text-shadow: var(--glow-red);
+            margin-bottom: 16px;
+        }
+        .footer-brand p {
+            font-size: 0.9rem; color: rgba(255,255,255,0.5);
+            max-width: 300px; margin-bottom: 24px;
+        }
+        .footer-social { display: flex; gap: 12px; }
+        .footer-social a {
+            width: 44px; height: 44px;
+            background: rgba(255,0,51,0.1);
+            border: 1px solid rgba(255,0,51,0.3);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--red); transition: all 0.3s;
+        }
+        .footer-social a:hover {
+            background: var(--red); color: var(--white);
+            box-shadow: var(--glow-red-soft);
+        }
+        .footer-social svg { width: 20px; height: 20px; }
+        
+        .footer-links h4 {
+            font-family: var(--font-mono); font-size: 0.7rem;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--red); margin-bottom: 24px;
+            text-shadow: var(--glow-red-soft);
+        }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 14px; }
+        .footer-links a {
+            color: rgba(255,255,255,0.5); text-decoration: none;
+            font-size: 0.9rem; transition: all 0.2s;
+        }
+        .footer-links a:hover { color: var(--red); text-shadow: var(--glow-red-soft); }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255,0,51,0.1);
+            padding-top: 24px;
+            display: flex; flex-direction: column; gap: 16px;
+            align-items: center; text-align: center;
+        }
+        @media (min-width: 640px) {
+            .footer-bottom { flex-direction: row; justify-content: space-between; text-align: left; }
+        }
+        .footer-bottom p { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+        .footer-bottom a { color: var(--red); text-decoration: none; }
+        
+        /* Scroll Reveal Animation */
+        .reveal {
+            opacity: 0; transform: translateY(50px);
+            transition: all 0.8s var(--ease-out);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal-delay-5 { transition-delay: 0.5s; }
+        .reveal-delay-6 { transition-delay: 0.6s; }
+        
+        /* Stats Banner */
+        .stats-banner {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 24px; padding: 60px 24px;
+            background: rgba(255,0,51,0.03);
+            border-top: 1px solid rgba(255,0,51,0.1);
+            border-bottom: 1px solid rgba(255,0,51,0.1);
+        }
+        @media (min-width: 768px) { .stats-banner { grid-template-columns: repeat(4, 1fr); } }
+        .stat { text-align: center; }
+        .stat-value {
+            font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 900; color: var(--red);
+            text-shadow: var(--glow-red-text);
+            line-height: 1; margin-bottom: 8px;
+        }
+        .stat-label {
+            font-family: var(--font-mono); font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        
+        /* Media query for cursor on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            body { cursor: auto; }
+            .cursor, .cursor-trail { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="global-canvas"></canvas>
+    <div class="grid-overlay"></div>
+    <div class="scanlines"></div>
+    
+    <!-- Custom Cursor -->
+    <div class="cursor"><div class="cursor-dot"></div></div>
+    
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">RED<span>_</span></a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#tech">Technology</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <button class="nav-cta" onclick="scrollTo('#pricing')">Get Yours</button>
+            <button class="menu-toggle" id="menuToggle">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <ul class="mobile-menu-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#tech">Technology</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+        </ul>
+        <button class="mobile-menu-cta" onclick="scrollTo('#pricing')">Get Your RED Card</button>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">
+            <span>Now Available</span>
+        </div>
+        <h1 class="hero-title">
+            <span class="red glitch" data-text="RED">RED</span>
+            <span class="sub">NFC Business Card</span>
+        </h1>
+        <p class="hero-tagline neon-pulse">&lt;/Connect With a Single Tap&gt;</p>
+        <p class="hero-desc">The future of networking is here. Share your complete digital identity instantly with military-grade NTAG 424 DNA technology. No apps required.</p>
+        <div class="hero-cta">
+            <a href="#pricing" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Order Now
+            </a>
+            <a href="#features" class="btn btn-secondary">Learn More</a>
+        </div>
+        
+        <div class="hero-card">
+            <div class="card-3d">
+                <div class="card-inner">
+                    <div>
+                        <div class="card-logo">RED_</div>
+                        <div class="card-nfc">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5.59 7.41A7 7 0 0 0 5 12a7 7 0 0 0 .59 4.59"/>
+                                <path d="M2 4.27A12 12 0 0 0 2 19.73"/>
+                                <path d="M18.41 7.41A7 7 0 0 1 19 12a7 7 0 0 1-.59 4.59"/>
+                                <path d="M22 4.27A12 12 0 0 1 22 19.73"/>
+                                <circle cx="12" cy="12" r="2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card-name">JOHN DOE</div>
+                        <div class="card-title">Chief Executive Officer</div>
+                    </div>
+                    <div class="card-chip"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+    
+    <!-- Stats Banner -->
+    <div class="stats-banner">
+        <div class="stat reveal">
+            <div class="stat-value">8KB</div>
+            <div class="stat-label">Storage Capacity</div>
+        </div>
+        <div class="stat reveal reveal-delay-1">
+            <div class="stat-value">424</div>
+            <div class="stat-label">DNA Technology</div>
+        </div>
+        <div class="stat reveal reveal-delay-2">
+            <div class="stat-value">&lt;1s</div>
+            <div class="stat-label">Transfer Speed</div>
+        </div>
+        <div class="stat reveal reveal-delay-3">
+            <div class="stat-value">∞</div>
+            <div class="stat-label">Taps Lifetime</div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <section class="section features" id="features">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <p class="section-label">Features</p>
+                <h2 class="section-title">Everything You Need,<br><span class="highlight">One Tap Away</span></h2>
+                <p>Store all your contact information, social profiles, and digital assets on a single card powered by advanced NFC technology.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-number">01</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                    </div>
+                    <h3>Instant Contact Sharing</h3>
+                    <p>Share your name, phone, email, and address with a single tap. Works with any NFC-enabled smartphone.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-number">02</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                    </div>
+                    <h3>Social Media Links</h3>
+                    <p>Connect all your social profiles—LinkedIn, Twitter, Instagram, GitHub, and more in one place.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-3">
+                    <div class="feature-number">03</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18"/>
+                            <path d="M9 21V9"/>
+                        </svg>
+                    </div>
+                    <h3>Custom Landing Page</h3>
+                    <p>Create a personalized digital profile with your bio, portfolio, and custom branding.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-4">
+                    <div class="feature-number">04</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <h3>Secure & Encrypted</h3>
+                    <p>Military-grade AES-128 encryption protects your data. Tamper-proof authentication included.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-5">
+                    <div class="feature-number">05</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20V10"/>
+                            <path d="M18 20V4"/>
+                            <path d="M6 20v-4"/>
+                        </svg>
+                    </div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Track every tap. See who's viewing your profile and optimize your networking strategy.</p>
+                </div>
+                <div class="feature-card reveal reveal-delay-6">
+                    <div class="feature-number">06</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <h3>Real-Time Updates</h3>
+                    <p>Update your information anytime. Changes reflect instantly—no need for new cards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Tech Specs Section -->
+    <section class="section tech-specs" id="tech">
+        <div class="section-container">
+            <div class="tech-grid">
+                <div class="tech-visual reveal">
+                    <div class="chip-diagram">
+                        <div class="chip-ring"></div>
+                        <div class="chip-ring"></div>
+                        <div class="chip-ring"></div>
+                        <div class="chip-core"><span>NTAG 424</span></div>
+                        <div class="chip-data">AES-128</div>
+                        <div class="chip-data">8KB EEPROM</div>
+                        <div class="chip-data">SUN AUTH</div>
+                        <div class="chip-data">ISO 14443-3A</div>
+                    </div>
+                </div>
+                <div class="tech-content reveal">
+                    <p class="section-label">Technology</p>
+                    <h2 class="section-title">Powered by <span class="highlight">NTAG 424 DNA</span></h2>
+                    <p>The most advanced NFC chip available. Maximum data storage capacity with enterprise-grade security features built in.</p>
+                    <ul class="spec-list">
+                        <li class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <h4>8KB Storage Capacity</h4>
+                                <p>Store complete vCard, multiple URLs, social links, and custom data with room to spare.</p>
+                            </div>
+                        </li>
+                        <li class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <h4>AES-128 Encryption</h4>
+                                <p>Bank-level security with Secure Unique NFC (SUN) authentication prevents cloning.</p>
+                            </div>
+                        </li>
+                        <li class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <h4>106-848 kbit/s Transfer</h4>
+                                <p>Lightning-fast data transfer. Share your complete profile in under a second.</p>
+                            </div>
+                        </li>
+                        <li class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <h4>Universal Compatibility</h4>
+                                <p>Works with all NFC-enabled devices—iOS 13+, Android 5.0+, no app required.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works Section -->
+    <section class="section how-it-works" id="how">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <p class="section-label">How It Works</p>
+                <h2 class="section-title">Three Steps to<br><span class="highlight">Seamless Networking</span></h2>
+            </div>
+            <div class="steps-container">
+                <div class="step reveal">
+                    <div class="step-number">01</div>
+                    <div class="step-content">
+                        <h3>Create Your Profile</h3>
+                        <p>Set up your digital identity through our web dashboard. Add your contact info, social links, portfolio URL, company details, and personal slogan. Customize your landing page with your brand colors.</p>
+                    </div>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">02</div>
+                    <div class="step-content">
+                        <h3>Program Your Card</h3>
+                        <p>We ship your RED card pre-programmed with your profile. Or use our mobile app to update your card anytime. All changes sync instantly to your NFC chip.</p>
+                    </div>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">03</div>
+                    <div class="step-content">
+                        <h3>Tap & Connect</h3>
+                        <p>Hold your RED card to any smartphone. Your contact info opens instantly—no app download required. Recipients can save your details with one click or explore your full profile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing Section -->
+    <section class="section pricing" id="pricing">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <p class="section-label">Pricing</p>
+                <h2 class="section-title">Choose Your <span class="highlight">RED</span></h2>
+                <p>Premium NFC cards built for professionals who demand the best.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="price-card reveal reveal-delay-1">
+                    <div class="price-name">Starter</div>
+                    <div class="price-amount">$49<span>/card</span></div>
+                    <p class="price-desc">Perfect for individuals</p>
+                    <ul class="price-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> NTAG 424 DNA Chip</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Basic Profile Page</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 Social Links</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Standard Card Design</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Free Shipping</li>
+                    </ul>
+                    <button class="btn btn-secondary price-btn">Get Started</button>
+                </div>
+                <div class="price-card featured reveal reveal-delay-2">
+                    <div class="price-badge">Most Popular</div>
+                    <div class="price-name">Professional</div>
+                    <div class="price-amount">$79<span>/card</span></div>
+                    <p class="price-desc">For power networkers</p>
+                    <ul class="price-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Everything in Starter</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Custom Profile Page</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Unlimited Social Links</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Analytics Dashboard</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Custom Card Color</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Priority Support</li>
+                    </ul>
+                    <button class="btn btn-primary price-btn">Get RED Pro</button>
+                </div>
+                <div class="price-card reveal reveal-delay-3">
+                    <div class="price-name">Enterprise</div>
+                    <div class="price-amount">$299<span>/10 cards</span></div>
+                    <p class="price-desc">For teams & companies</p>
+                    <ul class="price-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Everything in Pro</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Team Dashboard</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Custom Branding</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> CRM Integration</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Dedicated Support</li>
+                    </ul>
+                    <button class="btn btn-secondary price-btn">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="section cta-section">
+        <div class="section-container reveal">
+            <p class="section-label">Ready to Upgrade?</p>
+            <h2 class="section-title">Make Every Connection <span class="highlight">Count</span></h2>
+            <p>Join thousands of professionals who've upgraded their networking game with RED. Stand out, connect faster, and leave a lasting impression.</p>
+            <div class="cta-buttons">
+                <a href="#pricing" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    Order Your RED Card
+                </a>
+                <a href="#" class="btn btn-secondary">Schedule Demo</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="footer-logo">RED_</div>
+                    <p>The future of networking. Connect instantly with cutting-edge NFC technology.</p>
+                    <div class="footer-social">
+                        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+                        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+                        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+                        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#tech">Technology</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About DLT</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 <a href="#">Distributed Ledger Technologies</a>. All rights reserved.</p>
+                <p>Powered by <span style="color:var(--red)">NTAG 424 DNA</span></p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // THREE.JS PARTICLES - NEON RED MATRIX EFFECT
+        const canvas = document.getElementById('global-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+        
+        // Create particle system
+        const particleCount = 1000;
+        const positions = new Float32Array(particleCount * 3);
+        const velocities = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+            
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.02,
+                y: (Math.random() - 0.5) * 0.02 - 0.01,
+                z: (Math.random() - 0.5) * 0.01
+            });
+        }
+        
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        // Custom shader material for neon red particles
+        const material = new THREE.PointsMaterial({
+            color: 0xff0033,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+        
+        // Add connecting lines
+        const lineGeometry = new THREE.BufferGeometry();
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0xff0033,
+            transparent: true,
+            opacity: 0.1
+        });
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+        
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const posArray = particles.geometry.attributes.position.array;
+            const linePositions = [];
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Update positions
+                posArray[i * 3] += velocities[i].x;
+                posArray[i * 3 + 1] += velocities[i].y;
+                posArray[i * 3 + 2] += velocities[i].z;
+                
+                // Boundary wrapping
+                if (posArray[i * 3] > 50) posArray[i * 3] = -50;
+                if (posArray[i * 3] < -50) posArray[i * 3] = 50;
+                if (posArray[i * 3 + 1] > 50) posArray[i * 3 + 1] = -50;
+                if (posArray[i * 3 + 1] < -50) posArray[i * 3 + 1] = 50;
+                
+                // Connect nearby particles
+                for (let j = i + 1; j < Math.min(i + 10, particleCount); j++) {
+                    const dx = posArray[i * 3] - posArray[j * 3];
+                    const dy = posArray[i * 3 + 1] - posArray[j * 3 + 1];
+                    const dz = posArray[i * 3 + 2] - posArray[j * 3 + 2];
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    
+                    if (dist < 8) {
+                        linePositions.push(posArray[i * 3], posArray[i * 3 + 1], posArray[i * 3 + 2]);
+                        linePositions.push(posArray[j * 3], posArray[j * 3 + 1], posArray[j * 3 + 2]);
+                    }
+                }
+            }
+            
+            lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Mouse interaction
+            particles.rotation.y = mouseX * 0.1;
+            particles.rotation.x = mouseY * 0.05;
+            lines.rotation.y = mouseX * 0.1;
+            lines.rotation.x = mouseY * 0.05;
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // CUSTOM CURSOR WITH TRAIL
+        const cursor = document.querySelector('.cursor-dot');
+        const trailCount = 20;
+        const trails = [];
+        
+        for (let i = 0; i < trailCount; i++) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.opacity = (1 - i / trailCount) * 0.6;
+            trail.style.transform = `scale(${1 - i / trailCount})`;
+            document.body.appendChild(trail);
+            trails.push({ el: trail, x: 0, y: 0 });
+        }
+        
+        let cursorX = 0, cursorY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+        });
+        
+        function animateCursor() {
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            
+            let prevX = cursorX, prevY = cursorY;
+            trails.forEach((trail, i) => {
+                const delay = (i + 1) * 0.05;
+                trail.x += (prevX - trail.x) * (0.3 - delay * 0.01);
+                trail.y += (prevY - trail.y) * (0.3 - delay * 0.01);
+                trail.el.style.left = trail.x + 'px';
+                trail.el.style.top = trail.y + 'px';
+                prevX = trail.x;
+                prevY = trail.y;
+            });
+            
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+        
+        // NAVIGATION
+        const nav = document.getElementById('nav');
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+        
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        });
+        
+        document.querySelectorAll('.mobile-menu-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+        
+        function scrollTo(selector) {
+            const el = document.querySelector(selector);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+            menuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // SCROLL REVEAL
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+        
+        // 3D CARD TILT EFFECT
+        const card3d = document.querySelector('.card-3d');
+        if (card3d) {
+            card3d.addEventListener('mousemove', (e) => {
+                const rect = card3d.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                card3d.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            card3d.addEventListener('mouseleave', () => {
+                card3d.style.transform = 'perspective(1000px) rotateY(-5deg) rotateX(5deg)';
+            });
+        }
+        
+        // Console easter egg
+        console.log('%cRED', 'color: #ff0033; font-size: 48px; font-weight: bold; text-shadow: 0 0 10px #ff0033;');
+        console.log('%cNFC Business Card - Connect With a Tap', 'color: #888; font-size: 14px;');
+        console.log('%cPowered by Distributed Ledger Technologies', 'color: #ff0033; font-size: 12px;');
+    </script>
+</body>
+</html>
