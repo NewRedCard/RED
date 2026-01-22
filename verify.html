@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Digital Business Card</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #0f1419;
+            --cyan: #00d9ff;
+            --magenta: #ff0099;
+            --green: #00ff88;
+            --yellow: #ffaa00;
+            --text: #ffffff;
+            --text-gray: #8892b0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(255, 0, 153, 0.1) 0%, transparent 50%);
+        }
+        
+        .container {
+            max-width: 420px;
+            width: 100%;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 12px;
+            color: var(--cyan);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--cyan));
+        }
+        
+        /* Avatar */
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: var(--bg-dark);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Name & Title */
+        .name {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, var(--text), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .title {
+            text-align: center;
+            color: var(--magenta);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .company {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        /* Contact Info */
+        .contact-list {
+            list-style: none;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contact-item:hover {
+            color: var(--cyan);
+        }
+        
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0, 217, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .contact-label {
+            font-size: 11px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .contact-value {
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        /* Add Contact Button */
+        .add-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 25px;
+            background: linear-gradient(135deg, var(--magenta), #cc0077);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255, 0, 153, 0.3);
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(255, 0, 153, 0.4);
+        }
+        
+        .add-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Secondary buttons */
+        .secondary-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .sec-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            color: var(--cyan);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .sec-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 11px;
+        }
+        
+        .footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--green);
+            color: var(--bg-dark);
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-gray);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 217, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Social icons */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .social-link {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 20px;
+        }
+        
+        .social-link:hover {
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--cyan);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">█▓▒░ NEWREDCARD ░▒▓█</div>
+        </div>
+        
+        <div class="card" id="card">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading contact...</p>
+            </div>
+            
+            <div id="content" style="display: none;">
+                <div class="avatar" id="avatar">D</div>
+                <h1 class="name" id="name">Loading...</h1>
+                <p class="title" id="title"></p>
+                <p class="company" id="company"></p>
+                
+                <ul class="contact-list" id="contact-list">
+                    <!-- Populated by JS -->
+                </ul>
+                
+                <div class="social-links" id="social-links" style="display: none;">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <button class="add-btn" id="add-btn" onclick="downloadVCard()">
+                    📥 Add to Contacts
+                </button>
+                
+                <div class="secondary-btns">
+                    <a href="#" class="sec-btn" id="call-btn" style="display: none;">📞 Call</a>
+                    <a href="#" class="sec-btn" id="email-btn" style="display: none;">✉️ Email</a>
+                    <button class="sec-btn" onclick="shareContact()">📤 Share</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by <a href="https://newredcard.com">NewRedCard</a></p>
+            <p style="margin-top: 5px;">NFC Digital Business Card</p>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">Contact saved!</div>
+    
+    <script>
+        // Contact data - can be from URL params or embedded
+        let contactData = {
+            name: '',
+            firstName: '',
+            lastName: '',
+            title: '',
+            company: '',
+            phone: '',
+            phoneType: 'WORK',
+            email: '',
+            emailType: 'WORK',
+            website: '',
+            linkedin: '',
+            twitter: '',
+            note: ''
+        };
+        
+        // Parse URL parameters
+        function parseUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Support both full params and short codes
+            contactData.name = params.get('name') || params.get('n') || '';
+            contactData.firstName = params.get('first') || params.get('fn') || '';
+            contactData.lastName = params.get('last') || params.get('ln') || '';
+            contactData.title = params.get('title') || params.get('t') || '';
+            contactData.company = params.get('company') || params.get('org') || params.get('c') || '';
+            contactData.phone = params.get('phone') || params.get('tel') || params.get('p') || '';
+            contactData.email = params.get('email') || params.get('e') || '';
+            contactData.website = params.get('website') || params.get('url') || params.get('w') || '';
+            contactData.linkedin = params.get('linkedin') || params.get('li') || '';
+            contactData.twitter = params.get('twitter') || params.get('tw') || '';
+            contactData.note = params.get('note') || '';
+            
+            // If no name but has first/last, combine them
+            if (!contactData.name && (contactData.firstName || contactData.lastName)) {
+                contactData.name = `${contactData.firstName} ${contactData.lastName}`.trim();
+            }
+            
+            // If name but no first/last, try to split
+            if (contactData.name && !contactData.firstName) {
+                const parts = contactData.name.split(' ');
+                contactData.firstName = parts[0] || '';
+                contactData.lastName = parts.slice(1).join(' ') || '';
+            }
+        }
+        
+        // Render the contact card
+        function renderCard() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            // Avatar initials
+            const initials = getInitials(contactData.name || 'C');
+            document.getElementById('avatar').textContent = initials;
+            
+            // Name
+            document.getElementById('name').textContent = contactData.name || 'Contact';
+            
+            // Title & Company
+            const titleEl = document.getElementById('title');
+            const companyEl = document.getElementById('company');
+            
+            if (contactData.title) {
+                titleEl.textContent = contactData.title;
+                titleEl.style.display = 'block';
+            } else {
+                titleEl.style.display = 'none';
+            }
+            
+            if (contactData.company) {
+                companyEl.textContent = contactData.company;
+                companyEl.style.display = 'block';
+            } else {
+                companyEl.style.display = 'none';
+            }
+            
+            // Contact list
+            const list = document.getElementById('contact-list');
+            list.innerHTML = '';
+            
+            if (contactData.phone) {
+                list.innerHTML += createContactItem('📱', 'Phone', contactData.phone, `tel:${contactData.phone}`);
+                document.getElementById('call-btn').href = `tel:${contactData.phone}`;
+                document.getElementById('call-btn').style.display = 'block';
+            }
+            
+            if (contactData.email) {
+                list.innerHTML += createContactItem('✉️', 'Email', contactData.email, `mailto:${contactData.email}`);
+                document.getElementById('email-btn').href = `mailto:${contactData.email}`;
+                document.getElementById('email-btn').style.display = 'block';
+            }
+            
+            if (contactData.website) {
+                const url = contactData.website.startsWith('http') ? contactData.website : `https://${contactData.website}`;
+                list.innerHTML += createContactItem('🌐', 'Website', contactData.website.replace(/^https?:\/\//, ''), url);
+            }
+            
+            // Social links
+            const socialContainer = document.getElementById('social-links');
+            let socialHtml = '';
+            
+            if (contactData.linkedin) {
+                const url = contactData.linkedin.startsWith('http') ? contactData.linkedin : `https://linkedin.com/in/${contactData.linkedin}`;
+                socialHtml += `<a href="${url}" class="social-link" target="_blank">in</a>`;
+            }
+            
+            if (contactData.twitter) {
+                const handle = contactData.twitter.replace('@', '');
+                socialHtml += `<a href="https://twitter.com/${handle}" class="social-link" target="_blank">𝕏</a>`;
+            }
+            
+            if (socialHtml) {
+                socialContainer.innerHTML = socialHtml;
+                socialContainer.style.display = 'flex';
+            }
+        }
+        
+        function createContactItem(icon, label, value, href) {
+            const tag = href ? 'a' : 'div';
+            const hrefAttr = href ? `href="${href}"` : '';
+            const target = href && href.startsWith('http') ? 'target="_blank"' : '';
+            
+            return `
+                <${tag} class="contact-item" ${hrefAttr} ${target}>
+                    <div class="contact-icon">${icon}</div>
+                    <div>
+                        <div class="contact-label">${label}</div>
+                        <div class="contact-value">${escapeHtml(value)}</div>
+                    </div>
+                </${tag}>
+            `;
+        }
+        
+        function getInitials(name) {
+            return name.split(' ')
+                .map(part => part.charAt(0).toUpperCase())
+                .slice(0, 2)
+                .join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Generate vCard string
+        function generateVCard() {
+            const lines = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                `FN:${contactData.name || 'Contact'}`,
+            ];
+            
+            if (contactData.lastName || contactData.firstName) {
+                lines.push(`N:${contactData.lastName};${contactData.firstName};;;`);
+            }
+            
+            if (contactData.company) {
+                lines.push(`ORG:${contactData.company}`);
+            }
+            
+            if (contactData.title) {
+                lines.push(`TITLE:${contactData.title}`);
+            }
+            
+            if (contactData.phone) {
+                lines.push(`TEL;TYPE=${contactData.phoneType}:${contactData.phone}`);
+            }
+            
+            if (contactData.email) {
+                lines.push(`EMAIL;TYPE=${contactData.emailType}:${contactData.email}`);
+            }
+            
+            if (contactData.website) {
+                const url = contactData.website.startsWith('http') ? contactData.website : `https://${contactData.website}`;
+                lines.push(`URL:${url}`);
+            }
+            
+            if (contactData.linkedin) {
+                const url = contactData.linkedin.startsWith('http') ? contactData.linkedin : `https://linkedin.com/in/${contactData.linkedin}`;
+                lines.push(`URL;TYPE=LinkedIn:${url}`);
+            }
+            
+            if (contactData.twitter) {
+                const handle = contactData.twitter.replace('@', '');
+                lines.push(`URL;TYPE=Twitter:https://twitter.com/${handle}`);
+            }
+            
+            if (contactData.note) {
+                lines.push(`NOTE:${contactData.note.replace(/\n/g, '\\n')}`);
+            }
+            
+            lines.push('END:VCARD');
+            
+            // Use CRLF line endings as per vCard spec
+            return lines.join('\r\n');
+        }
+        
+        // Download vCard
+        function downloadVCard() {
+            const vcard = generateVCard();
+            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create filename from contact name
+            const filename = (contactData.name || 'contact').replace(/[^a-z0-9]/gi, '_') + '.vcf';
+            
+            // Create download link
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show toast
+            showToast('Contact file downloaded!');
+        }
+        
+        // Share contact
+        async function shareContact() {
+            if (navigator.share) {
+                try {
+                    const vcard = generateVCard();
+                    const blob = new Blob([vcard], { type: 'text/vcard' });
+                    const file = new File([blob], `${contactData.name || 'contact'}.vcf`, { type: 'text/vcard' });
+                    
+                    await navigator.share({
+                        title: contactData.name,
+                        text: `Contact info for ${contactData.name}`,
+                        files: [file]
+                    });
+                } catch (err) {
+                    // Fallback to URL share
+                    try {
+                        await navigator.share({
+                            title: contactData.name,
+                            text: `Contact info for ${contactData.name}`,
+                            url: window.location.href
+                        });
+                    } catch (e) {
+                        copyToClipboard(window.location.href);
+                    }
+                }
+            } else {
+                copyToClipboard(window.location.href);
+            }
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Link copied to clipboard!');
+            });
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // Auto-download on mobile (optional - uncomment to enable)
+        function autoDownloadOnMobile() {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile && contactData.name) {
+                // Small delay to let page render first
+                setTimeout(downloadVCard, 1000);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            parseUrlParams();
+            
+            // Check if we have any data
+            if (!contactData.name && !contactData.phone && !contactData.email) {
+                // Show demo data
+                contactData = {
+                    name: 'David Otero',
+                    firstName: 'David',
+                    lastName: 'Otero',
+                    title: 'CEO',
+                    company: 'Distributed Ledger Technologies',
+                    phone: '1800320000',
+                    phoneType: 'WORK',
+                    email: 'david@dlt.io',
+                    emailType: 'WORK',
+                    website: 'dlt.io',
+                    linkedin: 'davidotero',
+                    twitter: '',
+                    note: ''
+                };
+            }
+            
+            renderCard();
+            
+            // Uncomment to auto-download on mobile:
+            // autoDownloadOnMobile();
+        });
+    </script>
+</body>
+</html>
