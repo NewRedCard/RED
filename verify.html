@@ -8,25 +8,22 @@
     <title>Digital Business Card</title>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg-dark: #0a0e1a;
-            --bg-card: #0f1419;
-            --cyan: #00d9ff;
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --cyan: #00d4ff;
             --magenta: #ff0099;
             --green: #00ff88;
-            --yellow: #ffaa00;
+            --yellow: #ffd93d;
             --text: #ffffff;
-            --text-gray: #8892b0;
+            --text-gray: #8b949e;
+            --border: #30363d;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-dark);
             color: var(--text);
             min-height: 100vh;
@@ -35,35 +32,26 @@
             align-items: center;
             padding: 20px;
             background-image: 
-                radial-gradient(ellipse at top, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom, rgba(255, 0, 153, 0.1) 0%, transparent 50%);
+                radial-gradient(ellipse at top, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(255, 0, 153, 0.08) 0%, transparent 50%);
         }
         
-        .container {
-            max-width: 420px;
-            width: 100%;
-        }
+        .container { max-width: 440px; width: 100%; }
         
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        .header { text-align: center; margin-bottom: 24px; }
         
         .logo {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--cyan);
-            letter-spacing: 4px;
-            margin-bottom: 10px;
+            letter-spacing: 3px;
             font-family: 'Courier New', monospace;
         }
         
-        /* Card */
         .card {
             background: var(--bg-card);
-            border: 1px solid rgba(0, 217, 255, 0.3);
+            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 30px;
+            padding: 28px;
             position: relative;
             overflow: hidden;
         }
@@ -71,35 +59,31 @@
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 3px;
             background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--cyan));
         }
         
-        /* Avatar */
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--cyan), var(--magenta));
-            margin: 0 auto 20px;
+            margin: 0 auto 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 36px;
             font-weight: bold;
             color: var(--bg-dark);
-            border: 3px solid rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.15);
         }
         
-        /* Name & Title */
         .name {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             background: linear-gradient(90deg, var(--text), var(--cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -111,139 +95,202 @@
             color: var(--magenta);
             font-size: 14px;
             font-weight: 500;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .company {
             text-align: center;
             color: var(--text-gray);
-            font-size: 14px;
-            margin-bottom: 25px;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
         
-        /* Contact Info */
-        .contact-list {
-            list-style: none;
+        .section-label {
+            font-size: 10px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 18px 0 8px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
         }
+        
+        .contact-list { list-style: none; }
         
         .contact-item {
             display: flex;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 0;
             text-decoration: none;
             color: var(--text);
             transition: all 0.2s;
         }
         
-        .contact-item:last-child {
-            border-bottom: none;
-        }
-        
-        .contact-item:hover {
-            color: var(--cyan);
-        }
+        .contact-item:hover { color: var(--cyan); }
         
         .contact-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: rgba(0, 217, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(0, 212, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
-            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
         
+        .contact-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--cyan);
+        }
+        
+        .contact-icon.phone { background: rgba(0, 255, 136, 0.1); }
+        .contact-icon.phone svg { stroke: var(--green); }
+        .contact-icon.email { background: rgba(0, 212, 255, 0.1); }
+        .contact-icon.web { background: rgba(255, 0, 153, 0.1); }
+        .contact-icon.web svg { stroke: var(--magenta); }
+        .contact-icon.location { background: rgba(255, 217, 61, 0.1); }
+        .contact-icon.location svg { stroke: var(--yellow); }
+        .contact-icon.note { background: rgba(139, 148, 158, 0.1); }
+        .contact-icon.note svg { stroke: var(--text-gray); }
+        
+        .contact-info { flex: 1; min-width: 0; }
+        
         .contact-label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-gray);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .contact-value {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
+            word-break: break-word;
         }
         
-        /* Add Contact Button */
+        .social-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .social-link {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .social-link:hover {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--cyan);
+            transform: translateY(-2px);
+        }
+        
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        
         .add-btn {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             width: 100%;
-            padding: 16px;
-            margin-top: 25px;
-            background: linear-gradient(135deg, var(--magenta), #cc0077);
+            padding: 14px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, var(--green), #00cc6a);
             border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
+            border-radius: 10px;
+            color: #000;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            text-align: center;
-            text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(255, 0, 153, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.25);
         }
         
         .add-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(255, 0, 153, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.35);
         }
         
-        .add-btn:active {
-            transform: translateY(0);
-        }
+        .add-btn svg { width: 20px; height: 20px; }
         
-        /* Secondary buttons */
         .secondary-btns {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
         }
         
         .sec-btn {
             flex: 1;
-            padding: 12px;
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            border-radius: 10px;
-            color: var(--cyan);
-            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-gray);
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            text-align: center;
             text-decoration: none;
             transition: all 0.2s;
         }
         
         .sec-btn:hover {
-            background: rgba(0, 217, 255, 0.2);
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            border-color: var(--cyan);
         }
         
-        /* Footer */
+        .sec-btn svg { width: 16px; height: 16px; }
+        
         .footer {
-            margin-top: 30px;
+            margin-top: 24px;
             text-align: center;
             color: var(--text-gray);
             font-size: 11px;
         }
         
-        .footer a {
-            color: var(--cyan);
-            text-decoration: none;
+        .footer a { color: var(--cyan); text-decoration: none; }
+        
+        .uid-display {
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: var(--text-gray);
+            opacity: 0.6;
         }
         
-        /* Toast notification */
         .toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
             background: var(--green);
-            color: var(--bg-dark);
-            padding: 15px 25px;
+            color: #000;
+            padding: 14px 24px;
             border-radius: 10px;
             font-weight: 600;
             opacity: 0;
@@ -256,145 +303,200 @@
             opacity: 1;
         }
         
-        /* Loading state */
         .loading {
             text-align: center;
-            padding: 50px;
+            padding: 40px;
             color: var(--text-gray);
         }
         
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0, 217, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
             border-top-color: var(--cyan);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 16px;
         }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Social icons */
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .social-link {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-gray);
-            text-decoration: none;
-            transition: all 0.2s;
-            font-size: 20px;
-        }
-        
-        .social-link:hover {
-            background: rgba(0, 217, 255, 0.2);
-            color: var(--cyan);
-            transform: translateY(-2px);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">█▓▒░ NEWREDCARD ░▒▓█</div>
+            <div class="logo">◇ NEWREDCARD</div>
         </div>
         
-        <div class="card" id="card">
+        <div class="card">
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p>Loading contact...</p>
             </div>
             
             <div id="content" style="display: none;">
-                <div class="avatar" id="avatar">D</div>
+                <div class="avatar" id="avatar">?</div>
                 <h1 class="name" id="name">Loading...</h1>
                 <p class="title" id="title"></p>
                 <p class="company" id="company"></p>
                 
-                <ul class="contact-list" id="contact-list">
-                    <!-- Populated by JS -->
-                </ul>
-                
-                <div class="social-links" id="social-links" style="display: none;">
+                <div id="contact-sections">
                     <!-- Populated by JS -->
                 </div>
                 
-                <button class="add-btn" id="add-btn" onclick="downloadVCard()">
-                    📥 Add to Contacts
+                <div class="social-links" id="social-links" style="display: none;"></div>
+                
+                <button class="add-btn" onclick="downloadVCard()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    Add to Contacts
                 </button>
                 
                 <div class="secondary-btns">
-                    <a href="#" class="sec-btn" id="call-btn" style="display: none;">📞 Call</a>
-                    <a href="#" class="sec-btn" id="email-btn" style="display: none;">✉️ Email</a>
-                    <button class="sec-btn" onclick="shareContact()">📤 Share</button>
+                    <a href="#" class="sec-btn" id="call-btn" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        Call
+                    </a>
+                    <a href="#" class="sec-btn" id="email-btn" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        Email
+                    </a>
+                    <button class="sec-btn" onclick="shareContact()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                        </svg>
+                        Share
+                    </button>
                 </div>
+                
+                <div class="uid-display" id="uid-display" style="display: none;"></div>
             </div>
         </div>
         
         <div class="footer">
             <p>Powered by <a href="https://newredcard.com">NewRedCard</a></p>
-            <p style="margin-top: 5px;">NFC Digital Business Card</p>
         </div>
     </div>
     
     <div class="toast" id="toast">Contact saved!</div>
     
     <script>
-        // Contact data - can be from URL params or embedded
         let contactData = {
-            name: '',
-            firstName: '',
-            lastName: '',
-            title: '',
-            company: '',
-            phone: '',
-            phoneType: 'WORK',
-            email: '',
-            emailType: 'WORK',
-            website: '',
-            linkedin: '',
-            twitter: '',
-            note: ''
+            name: '', firstName: '', lastName: '',
+            title: '', company: '', department: '',
+            phones: [], emails: [], websites: [], social: [],
+            address: '', city: '', state: '', zip: '', country: '',
+            note: '', uid: ''
         };
         
-        // Parse URL parameters
+        // SVG Icons
+        const icons = {
+            phone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.574 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+            email: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+            web: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+            location: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+            note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`
+        };
+        
         function parseUrlParams() {
             const params = new URLSearchParams(window.location.search);
             
-            // Support both full params and short codes
-            contactData.name = params.get('name') || params.get('n') || '';
-            contactData.firstName = params.get('first') || params.get('fn') || '';
-            contactData.lastName = params.get('last') || params.get('ln') || '';
+            // Basic info
+            contactData.name = params.get('name') || params.get('fn') || params.get('n') || '';
+            contactData.firstName = params.get('first') || '';
+            contactData.lastName = params.get('last') || '';
             contactData.title = params.get('title') || params.get('t') || '';
             contactData.company = params.get('company') || params.get('org') || params.get('c') || '';
-            contactData.phone = params.get('phone') || params.get('tel') || params.get('p') || '';
-            contactData.email = params.get('email') || params.get('e') || '';
-            contactData.website = params.get('website') || params.get('url') || params.get('w') || '';
-            contactData.linkedin = params.get('linkedin') || params.get('li') || '';
-            contactData.twitter = params.get('twitter') || params.get('tw') || '';
-            contactData.note = params.get('note') || '';
+            contactData.department = params.get('dept') || params.get('department') || '';
+            contactData.note = params.get('note') || params.get('notes') || '';
+            contactData.uid = params.get('uid') || '';
             
-            // If no name but has first/last, combine them
+            // Phones - support multiple
+            contactData.phones = [];
+            ['phone', 'tel', 'p', 'mobile', 'cell', 'work', 'home', 'fax'].forEach(key => {
+                const val = params.get(key);
+                if (val) contactData.phones.push({ type: getPhoneType(key), number: val });
+            });
+            for (let i = 2; i <= 5; i++) {
+                ['phone', 'p', 'tel'].forEach(prefix => {
+                    const val = params.get(prefix + i);
+                    if (val) contactData.phones.push({ type: 'OTHER', number: val });
+                });
+            }
+            
+            // Emails - support multiple
+            contactData.emails = [];
+            ['email', 'e', 'mail'].forEach(key => {
+                const val = params.get(key);
+                if (val) contactData.emails.push({ type: 'WORK', address: val });
+            });
+            for (let i = 2; i <= 5; i++) {
+                ['email', 'e'].forEach(prefix => {
+                    const val = params.get(prefix + i);
+                    if (val) contactData.emails.push({ type: 'OTHER', address: val });
+                });
+            }
+            
+            // Websites - support multiple
+            contactData.websites = [];
+            ['website', 'web', 'url', 'site', 'w'].forEach(key => {
+                const val = params.get(key);
+                if (val) contactData.websites.push(val);
+            });
+            for (let i = 2; i <= 3; i++) {
+                ['website', 'web', 'url'].forEach(prefix => {
+                    const val = params.get(prefix + i);
+                    if (val) contactData.websites.push(val);
+                });
+            }
+            
+            // Social media
+            contactData.social = [];
+            const platforms = [
+                { keys: ['linkedin', 'li'], name: 'LinkedIn', prefix: 'https://linkedin.com/in/', icon: 'in' },
+                { keys: ['twitter', 'tw', 'x'], name: 'Twitter', prefix: 'https://twitter.com/', icon: '𝕏' },
+                { keys: ['instagram', 'ig'], name: 'Instagram', prefix: 'https://instagram.com/', icon: 'IG' },
+                { keys: ['facebook', 'fb'], name: 'Facebook', prefix: 'https://facebook.com/', icon: 'f' },
+                { keys: ['github', 'gh'], name: 'GitHub', prefix: 'https://github.com/', icon: 'GH' },
+                { keys: ['youtube', 'yt'], name: 'YouTube', prefix: 'https://youtube.com/@', icon: 'YT' },
+                { keys: ['tiktok', 'tt'], name: 'TikTok', prefix: 'https://tiktok.com/@', icon: 'TT' },
+                { keys: ['telegram', 'tg'], name: 'Telegram', prefix: 'https://t.me/', icon: 'TG' },
+                { keys: ['whatsapp', 'wa'], name: 'WhatsApp', prefix: 'https://wa.me/', icon: 'WA' },
+                { keys: ['snapchat', 'snap'], name: 'Snapchat', prefix: 'https://snapchat.com/add/', icon: 'SC' },
+            ];
+            
+            platforms.forEach(p => {
+                p.keys.forEach(key => {
+                    const val = params.get(key);
+                    if (val) {
+                        const url = val.startsWith('http') ? val : p.prefix + val.replace('@', '');
+                        contactData.social.push({ name: p.name, url, icon: p.icon });
+                    }
+                });
+            });
+            
+            // Address
+            contactData.address = params.get('address') || params.get('addr') || '';
+            contactData.city = params.get('city') || '';
+            contactData.state = params.get('state') || '';
+            contactData.zip = params.get('zip') || params.get('postal') || '';
+            contactData.country = params.get('country') || '';
+            
+            // Build name from first/last if needed
             if (!contactData.name && (contactData.firstName || contactData.lastName)) {
                 contactData.name = `${contactData.firstName} ${contactData.lastName}`.trim();
             }
-            
-            // If name but no first/last, try to split
             if (contactData.name && !contactData.firstName) {
                 const parts = contactData.name.split(' ');
                 contactData.firstName = parts[0] || '';
@@ -402,98 +504,132 @@
             }
         }
         
-        // Render the contact card
+        function getPhoneType(key) {
+            if (key.includes('cell') || key.includes('mobile')) return 'CELL';
+            if (key.includes('home')) return 'HOME';
+            if (key.includes('fax')) return 'FAX';
+            return 'WORK';
+        }
+        
         function renderCard() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             
-            // Avatar initials
-            const initials = getInitials(contactData.name || 'C');
+            // Avatar
+            const initials = contactData.name ? contactData.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : '?';
             document.getElementById('avatar').textContent = initials;
             
             // Name
             document.getElementById('name').textContent = contactData.name || 'Contact';
             
-            // Title & Company
+            // Title
             const titleEl = document.getElementById('title');
+            let titleText = contactData.title || '';
+            if (contactData.department) titleText += titleText ? ` · ${contactData.department}` : contactData.department;
+            titleEl.textContent = titleText;
+            titleEl.style.display = titleText ? 'block' : 'none';
+            
+            // Company
             const companyEl = document.getElementById('company');
+            companyEl.textContent = contactData.company || '';
+            companyEl.style.display = contactData.company ? 'block' : 'none';
             
-            if (contactData.title) {
-                titleEl.textContent = contactData.title;
-                titleEl.style.display = 'block';
-            } else {
-                titleEl.style.display = 'none';
+            // Contact sections
+            const sections = document.getElementById('contact-sections');
+            sections.innerHTML = '';
+            
+            // Phones
+            if (contactData.phones.length) {
+                sections.innerHTML += '<div class="section-label">Phone</div><ul class="contact-list">';
+                contactData.phones.forEach((p, i) => {
+                    const label = p.type === 'CELL' ? 'Mobile' : p.type === 'HOME' ? 'Home' : p.type === 'FAX' ? 'Fax' : 'Work';
+                    sections.innerHTML += createItem('phone', label, p.number, `tel:${p.number}`);
+                    if (i === 0) {
+                        document.getElementById('call-btn').href = `tel:${p.number}`;
+                        document.getElementById('call-btn').style.display = 'flex';
+                    }
+                });
+                sections.innerHTML += '</ul>';
             }
             
-            if (contactData.company) {
-                companyEl.textContent = contactData.company;
-                companyEl.style.display = 'block';
-            } else {
-                companyEl.style.display = 'none';
+            // Emails
+            if (contactData.emails.length) {
+                sections.innerHTML += '<div class="section-label">Email</div><ul class="contact-list">';
+                contactData.emails.forEach((e, i) => {
+                    sections.innerHTML += createItem('email', e.type === 'HOME' ? 'Personal' : 'Work', e.address, `mailto:${e.address}`);
+                    if (i === 0) {
+                        document.getElementById('email-btn').href = `mailto:${e.address}`;
+                        document.getElementById('email-btn').style.display = 'flex';
+                    }
+                });
+                sections.innerHTML += '</ul>';
             }
             
-            // Contact list
-            const list = document.getElementById('contact-list');
-            list.innerHTML = '';
-            
-            if (contactData.phone) {
-                list.innerHTML += createContactItem('📱', 'Phone', contactData.phone, `tel:${contactData.phone}`);
-                document.getElementById('call-btn').href = `tel:${contactData.phone}`;
-                document.getElementById('call-btn').style.display = 'block';
+            // Websites
+            if (contactData.websites.length) {
+                sections.innerHTML += '<div class="section-label">Website</div><ul class="contact-list">';
+                contactData.websites.forEach(w => {
+                    const url = w.startsWith('http') ? w : `https://${w}`;
+                    const display = w.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                    sections.innerHTML += createItem('web', 'Website', display, url);
+                });
+                sections.innerHTML += '</ul>';
             }
             
-            if (contactData.email) {
-                list.innerHTML += createContactItem('✉️', 'Email', contactData.email, `mailto:${contactData.email}`);
-                document.getElementById('email-btn').href = `mailto:${contactData.email}`;
-                document.getElementById('email-btn').style.display = 'block';
+            // Address
+            if (contactData.address || contactData.city) {
+                let addrParts = [];
+                if (contactData.address) addrParts.push(contactData.address);
+                let cityLine = contactData.city || '';
+                if (contactData.state) cityLine += cityLine ? `, ${contactData.state}` : contactData.state;
+                if (contactData.zip) cityLine += ` ${contactData.zip}`;
+                if (cityLine) addrParts.push(cityLine);
+                if (contactData.country) addrParts.push(contactData.country);
+                
+                const fullAddr = addrParts.join(', ');
+                const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(fullAddr)}`;
+                
+                sections.innerHTML += '<div class="section-label">Address</div><ul class="contact-list">';
+                sections.innerHTML += createItem('location', 'Address', fullAddr, mapsUrl);
+                sections.innerHTML += '</ul>';
             }
             
-            if (contactData.website) {
-                const url = contactData.website.startsWith('http') ? contactData.website : `https://${contactData.website}`;
-                list.innerHTML += createContactItem('🌐', 'Website', contactData.website.replace(/^https?:\/\//, ''), url);
+            // Note
+            if (contactData.note) {
+                sections.innerHTML += '<div class="section-label">Note</div><ul class="contact-list">';
+                sections.innerHTML += createItem('note', 'Note', contactData.note, null);
+                sections.innerHTML += '</ul>';
             }
             
-            // Social links
-            const socialContainer = document.getElementById('social-links');
-            let socialHtml = '';
-            
-            if (contactData.linkedin) {
-                const url = contactData.linkedin.startsWith('http') ? contactData.linkedin : `https://linkedin.com/in/${contactData.linkedin}`;
-                socialHtml += `<a href="${url}" class="social-link" target="_blank">in</a>`;
+            // Social
+            if (contactData.social.length) {
+                const container = document.getElementById('social-links');
+                container.innerHTML = contactData.social.map(s => 
+                    `<a href="${s.url}" class="social-link" target="_blank" title="${s.name}">${s.icon}</a>`
+                ).join('');
+                container.style.display = 'flex';
             }
             
-            if (contactData.twitter) {
-                const handle = contactData.twitter.replace('@', '');
-                socialHtml += `<a href="https://twitter.com/${handle}" class="social-link" target="_blank">𝕏</a>`;
-            }
-            
-            if (socialHtml) {
-                socialContainer.innerHTML = socialHtml;
-                socialContainer.style.display = 'flex';
+            // UID
+            if (contactData.uid) {
+                const uidEl = document.getElementById('uid-display');
+                uidEl.textContent = `Card ID: ${contactData.uid}`;
+                uidEl.style.display = 'block';
             }
         }
         
-        function createContactItem(icon, label, value, href) {
+        function createItem(type, label, value, href) {
             const tag = href ? 'a' : 'div';
             const hrefAttr = href ? `href="${href}"` : '';
             const target = href && href.startsWith('http') ? 'target="_blank"' : '';
-            
             return `
-                <${tag} class="contact-item" ${hrefAttr} ${target}>
-                    <div class="contact-icon">${icon}</div>
-                    <div>
+                <li><${tag} class="contact-item" ${hrefAttr} ${target}>
+                    <div class="contact-icon ${type}">${icons[type]}</div>
+                    <div class="contact-info">
                         <div class="contact-label">${label}</div>
                         <div class="contact-value">${escapeHtml(value)}</div>
                     </div>
-                </${tag}>
-            `;
-        }
-        
-        function getInitials(name) {
-            return name.split(' ')
-                .map(part => part.charAt(0).toUpperCase())
-                .slice(0, 2)
-                .join('');
+                </${tag}></li>`;
         }
         
         function escapeHtml(text) {
@@ -502,69 +638,43 @@
             return div.innerHTML;
         }
         
-        // Generate vCard string
         function generateVCard() {
-            const lines = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                `FN:${contactData.name || 'Contact'}`,
-            ];
+            const lines = ['BEGIN:VCARD', 'VERSION:3.0'];
+            lines.push(`FN:${contactData.name || 'Contact'}`);
             
             if (contactData.lastName || contactData.firstName) {
                 lines.push(`N:${contactData.lastName};${contactData.firstName};;;`);
             }
+            if (contactData.company) lines.push(`ORG:${contactData.company}`);
+            if (contactData.title) lines.push(`TITLE:${contactData.title}`);
+            if (contactData.department) lines.push(`X-DEPARTMENT:${contactData.department}`);
             
-            if (contactData.company) {
-                lines.push(`ORG:${contactData.company}`);
+            contactData.phones.forEach(p => lines.push(`TEL;TYPE=${p.type}:${p.number}`));
+            contactData.emails.forEach(e => lines.push(`EMAIL;TYPE=${e.type}:${e.address}`));
+            
+            contactData.websites.forEach((w, i) => {
+                const url = w.startsWith('http') ? w : `https://${w}`;
+                lines.push(i === 0 ? `URL:${url}` : `URL;TYPE=OTHER:${url}`);
+            });
+            
+            contactData.social.forEach(s => lines.push(`URL;TYPE=${s.name.toUpperCase()}:${s.url}`));
+            
+            if (contactData.address || contactData.city) {
+                lines.push(`ADR;TYPE=WORK:;;${contactData.address || ''};${contactData.city || ''};${contactData.state || ''};${contactData.zip || ''};${contactData.country || ''}`);
             }
             
-            if (contactData.title) {
-                lines.push(`TITLE:${contactData.title}`);
-            }
-            
-            if (contactData.phone) {
-                lines.push(`TEL;TYPE=${contactData.phoneType}:${contactData.phone}`);
-            }
-            
-            if (contactData.email) {
-                lines.push(`EMAIL;TYPE=${contactData.emailType}:${contactData.email}`);
-            }
-            
-            if (contactData.website) {
-                const url = contactData.website.startsWith('http') ? contactData.website : `https://${contactData.website}`;
-                lines.push(`URL:${url}`);
-            }
-            
-            if (contactData.linkedin) {
-                const url = contactData.linkedin.startsWith('http') ? contactData.linkedin : `https://linkedin.com/in/${contactData.linkedin}`;
-                lines.push(`URL;TYPE=LinkedIn:${url}`);
-            }
-            
-            if (contactData.twitter) {
-                const handle = contactData.twitter.replace('@', '');
-                lines.push(`URL;TYPE=Twitter:https://twitter.com/${handle}`);
-            }
-            
-            if (contactData.note) {
-                lines.push(`NOTE:${contactData.note.replace(/\n/g, '\\n')}`);
-            }
+            if (contactData.note) lines.push(`NOTE:${contactData.note.replace(/\n/g, '\\n')}`);
             
             lines.push('END:VCARD');
-            
-            // Use CRLF line endings as per vCard spec
             return lines.join('\r\n');
         }
         
-        // Download vCard
         function downloadVCard() {
             const vcard = generateVCard();
             const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
             const url = URL.createObjectURL(blob);
-            
-            // Create filename from contact name
             const filename = (contactData.name || 'contact').replace(/[^a-z0-9]/gi, '_') + '.vcf';
             
-            // Create download link
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
@@ -573,32 +683,20 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            // Show toast
             showToast('Contact file downloaded!');
         }
         
-        // Share contact
         async function shareContact() {
             if (navigator.share) {
                 try {
                     const vcard = generateVCard();
                     const blob = new Blob([vcard], { type: 'text/vcard' });
                     const file = new File([blob], `${contactData.name || 'contact'}.vcf`, { type: 'text/vcard' });
-                    
-                    await navigator.share({
-                        title: contactData.name,
-                        text: `Contact info for ${contactData.name}`,
-                        files: [file]
-                    });
-                } catch (err) {
-                    // Fallback to URL share
+                    await navigator.share({ title: contactData.name, text: `Contact: ${contactData.name}`, files: [file] });
+                } catch (e) {
                     try {
-                        await navigator.share({
-                            title: contactData.name,
-                            text: `Contact info for ${contactData.name}`,
-                            url: window.location.href
-                        });
-                    } catch (e) {
+                        await navigator.share({ title: contactData.name, url: window.location.href });
+                    } catch (e2) {
                         copyToClipboard(window.location.href);
                     }
                 }
@@ -608,55 +706,37 @@
         }
         
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Link copied to clipboard!');
-            });
+            navigator.clipboard.writeText(text).then(() => showToast('Link copied!'));
         }
         
-        function showToast(message) {
+        function showToast(msg) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            toast.textContent = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
         
-        // Auto-download on mobile (optional - uncomment to enable)
-        function autoDownloadOnMobile() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (isMobile && contactData.name) {
-                // Small delay to let page render first
-                setTimeout(downloadVCard, 1000);
-            }
-        }
-        
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             parseUrlParams();
             
-            // Check if we have any data
-            if (!contactData.name && !contactData.phone && !contactData.email) {
-                // Show demo data
+            if (!contactData.name && !contactData.phones.length && !contactData.emails.length) {
+                // Demo data
                 contactData = {
-                    name: 'David Otero',
-                    firstName: 'David',
-                    lastName: 'Otero',
-                    title: 'CEO',
-                    company: 'Distributed Ledger Technologies',
-                    phone: '1800320000',
-                    phoneType: 'WORK',
-                    email: 'david@dlt.io',
-                    emailType: 'WORK',
-                    website: 'dlt.io',
-                    linkedin: 'davidotero',
-                    twitter: '',
-                    note: ''
+                    name: 'David Otero', firstName: 'David', lastName: 'Otero',
+                    title: 'CEO', company: 'Distributed Ledger Technologies', department: '',
+                    phones: [{ type: 'WORK', number: '1800320000' }, { type: 'CELL', number: '5551234567' }],
+                    emails: [{ type: 'WORK', address: 'david@dlt.io' }],
+                    websites: ['dlt.io', 'newredcard.com'],
+                    social: [
+                        { name: 'LinkedIn', url: 'https://linkedin.com/in/davidotero', icon: 'in' },
+                        { name: 'GitHub', url: 'https://github.com/SystemThreat', icon: 'GH' }
+                    ],
+                    address: '', city: 'Austin', state: 'TX', zip: '', country: 'USA',
+                    note: 'Blockchain infrastructure specialist', uid: 'DEMO'
                 };
             }
             
             renderCard();
-            
-            // Uncomment to auto-download on mobile:
-            // autoDownloadOnMobile();
         });
     </script>
 </body>
